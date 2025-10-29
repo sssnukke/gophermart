@@ -7,9 +7,9 @@ type User struct {
 	Login        string `json:"login" gorm:"uniqueIndex;not null"`
 	PasswordHash string `json:"-" gorm:"not null"`
 	CreatedAt    time.Time
-	Order        []Order `json:"orders"`
-	Balance      float64 `json:"balance" gorm:"default:0"`
-	Withdrawn    float64 `json:"withdrawn" gorm:"default:0"`
+	Order        []Order      `json:"orders"`
+	Withdrawal   []Withdrawal `json:"withdrawals"`
+	Balance      float64      `json:"balance" gorm:"default:0"`
 }
 
 type Order struct {

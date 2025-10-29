@@ -60,8 +60,8 @@ func (w *Worker) processOrders() {
 		order.Accrual = data.Accrual
 		w.db.Save(&order)
 
-		if data.Status == "PROCESSING" && data.Accrual != nil {
-			w.db.Model(&db.User{}).Where("user_id = ?", order.UserID).Update("balance", gorm.Expr("balance + ?", *data.Accrual))
+		if data.Status == "PROCESSED" && data.Accrual != nil {
+			w.db.Model(&db.User{}).Where("id = ?", order.UserID).Update("balance", gorm.Expr("balance + ?", *data.Accrual))
 			log.Printf("Add %.2f balance %d", *data.Accrual, order.UserID)
 		}
 	}

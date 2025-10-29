@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"gophermart/internal/auth"
+	"gophermart/internal/balance"
 	"gophermart/internal/config"
 	"gophermart/internal/orders"
 	"gorm.io/gorm"
@@ -52,6 +53,16 @@ func (s *Server) routers() {
 
 	protected.HandleFunc("/orders", ordersHandler.List).Methods("GET")
 	protected.HandleFunc("/orders", ordersHandler.Create).Methods("POST")
+
+	// Balance
+	balanceRepo := balance.NewRepository(s.db)
+	balanceService := balance.NewService(balanceRepo)
+	balanceHandler := balance.NewHandler(balanceService)
+
+	protected.HandleFunc("/balance", balanceHandler.GetBalance).Methods("GET")
+	protected.HandleFunc("/balance/withdraw", balanceHandler.Withdraw).Methods("POST")
+	protected.HandleFunc("/withdrawals", balanceHandler.GetWithdrawals).Methods("GET")
+
 }
 
 func (s *Server) Start() {

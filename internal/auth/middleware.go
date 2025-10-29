@@ -31,3 +31,13 @@ func Middleware(tm *TokenManager) func(http.Handler) http.Handler {
 		})
 	}
 }
+
+func GetUserIDFromContext(ctx context.Context) (uint, bool) {
+	val := ctx.Value(UserIDKey)
+	if val == nil {
+		return 0, false
+	}
+
+	id, ok := val.(uint)
+	return id, ok
+}
