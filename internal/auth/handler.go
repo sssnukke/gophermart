@@ -2,16 +2,19 @@ package auth
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
 type Handler struct {
-	service *Service
+	service      *Service
+	tokenManager *TokenManager
 }
 
-func NewHandler(service *Service) *Handler {
+func NewHandler(service *Service, tokenManager *TokenManager) *Handler {
 	return &Handler{
-		service: service,
+		service:      service,
+		tokenManager: tokenManager,
 	}
 }
 
@@ -33,7 +36,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := GenerateToken(user.ID)
+	token, _ := h.tokenManager.GenerateToken(user.ID)
+	log.Printf("token: %v", token)
 	w.Header().Set("Authorization", "Bearer "+token)
 	w.WriteHeader(http.StatusOK)
 }
@@ -55,7 +59,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := GenerateToken(user.ID)
+	token, _ := h.tokenManager.GenerateToken(user.ID)
 	w.Header().Set("Authorization", "Bearer "+token)
 	w.WriteHeader(http.StatusOK)
 }

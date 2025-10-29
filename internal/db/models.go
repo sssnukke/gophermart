@@ -5,8 +5,9 @@ import "time"
 type User struct {
 	ID           uint   `json:"-" gorm:"primaryKey"`
 	Login        string `json:"login" gorm:"uniqueIndex;not null"`
-	PasswordHash string `json:"password_hash" gorm:"not null"`
+	PasswordHash string `json:"-" gorm:"not null"`
 	CreatedAt    time.Time
+	Order        []Order `json:"orders"`
 }
 
 type Order struct {

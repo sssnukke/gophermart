@@ -2,7 +2,6 @@ package auth
 
 import (
 	"github.com/golang-jwt/jwt/v5"
-	"gophermart/internal/config"
 	"time"
 )
 
@@ -11,9 +10,19 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID uint) (string, error) {
-	cfg := config.Load()
+type TokenManager struct {
+	secret []byte
+	ttl    time.Duration
+}
 
+func NewTokenManager(secret string, ttl time.Duration) *TokenManager {
+	return &TokenManager{
+		secret: []byte(secret),
+		ttl:    ttl,
+	}
+}
+
+func (tm *TokenManager) GenerateToken(userID uint) (string, error) {
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -22,14 +31,12 @@ func GenerateToken(userID uint) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(cfg.SecretToken)
+	return token.SignedString(tm.secret)
 }
 
-func ParseToken(tokenStr string) (*Claims, error) {
-	cfg := config.Load()
-
+func (tm *TokenManager) ParseToken(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		return cfg.SecretToken, nil
+		return tm.secret, nil
 	})
 	if err != nil {
 		return nil, err

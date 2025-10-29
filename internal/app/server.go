@@ -5,9 +5,11 @@ import (
 	"github.com/gorilla/mux"
 	"gophermart/internal/auth"
 	"gophermart/internal/config"
+	"gophermart/internal/orders"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Server struct {
@@ -27,12 +29,26 @@ func NewServer(cfg *config.Config, db *gorm.DB) *Server {
 }
 
 func (s *Server) routers() {
+	authTokenManager := auth.NewTokenManager(s.cfg.SecretToken, 24*time.Hour)
+
+	protected := s.router.PathPrefix("/api/user").Subrouter()
+	protected.Use(auth.Middleware(authTokenManager))
+
+	//Auth
 	authRepo := auth.NewRepository(s.db)
 	authService := auth.NewService(authRepo)
-	authHandler := auth.NewHandler(authService)
+	authHandler := auth.NewHandler(authService, authTokenManager)
 
 	s.router.HandleFunc("/api/user/register", authHandler.Register).Methods("POST")
 	s.router.HandleFunc("/api/user/login", authHandler.Login).Methods("POST")
+
+	//Orders
+	ordersRepo := orders.NewRepository(s.db)
+	ordersService := orders.NewService(ordersRepo)
+	ordersHandler := orders.NewHandler(ordersService)
+
+	protected.HandleFunc("/orders", ordersHandler.List).Methods("GET")
+	protected.HandleFunc("/orders", ordersHandler.Create).Methods("POST")
 }
 
 func (s *Server) Start() {
