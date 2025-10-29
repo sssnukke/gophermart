@@ -8,6 +8,8 @@ type User struct {
 	PasswordHash string `json:"-" gorm:"not null"`
 	CreatedAt    time.Time
 	Order        []Order `json:"orders"`
+	Balance      float64 `json:"balance" gorm:"default:0"`
+	Withdrawn    float64 `json:"withdrawn" gorm:"default:0"`
 }
 
 type Order struct {

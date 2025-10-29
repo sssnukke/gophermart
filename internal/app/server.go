@@ -31,6 +31,9 @@ func NewServer(cfg *config.Config, db *gorm.DB) *Server {
 func (s *Server) routers() {
 	authTokenManager := auth.NewTokenManager(s.cfg.SecretToken, 24*time.Hour)
 
+	worker := orders.NewWorker(s.db, s.cfg.AccrualSystemAddress, 10*time.Second)
+	worker.Start()
+
 	protected := s.router.PathPrefix("/api/user").Subrouter()
 	protected.Use(auth.Middleware(authTokenManager))
 
